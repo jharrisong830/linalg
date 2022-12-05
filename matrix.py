@@ -1,6 +1,6 @@
 '''
 AUTHOR:         @jharrisong830
-VERSION:        1.0
+VERSION:        1.1
 DATE:           12/05/22
 DESCRIPTION:    Matrix creator and matrix operations calculator
 '''
@@ -89,12 +89,16 @@ class Matrix:
     def set(self, m, n, arg):
         '''Sets the entry of the matrix at (m, n) to the value specified by arg'''
         self.__A[m-1][n-1]=arg
+    
+    def get_vector(self, n):
+        '''Returns the vector of column n'''
+        return self.__column_vector(n)
 
-    def row_vector(self, m):
+    def __row_vector(self, m):
         '''Returns a vector of row m'''
         return Vector(self.__A[m-1])
     
-    def column_vector(self, n):
+    def __column_vector(self, n):
         '''Returns a vector of column n'''
         result=[]
         for i in range(self.rows):
@@ -118,8 +122,21 @@ class Matrix:
         C=Matrix(self.rows, B.columns, operation=True)
         for i in range(C.rows):
             for j in range(C.columns):
-                row_vec=self.row_vector(i+1)
-                col_vec=B.column_vector(j+1)
+                row_vec=self.__row_vector(i+1)
+                col_vec=B.__column_vector(j+1)
                 prod=row_vec.dot_product(col_vec)
                 C.set(i+1, j+1, prod)
         return C
+    
+    def transpose(self):
+        '''Transposes a matrix'''
+        T=[]
+        m=self.columns
+        n=self.rows
+        for i in range(self.columns):
+            T.append([])
+            for j in range(self.rows):
+                T[i].append(self.get(j+1, i+1))
+        self.rows=m
+        self.columns=n
+        self.__A=T

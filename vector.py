@@ -1,6 +1,6 @@
 '''
 AUTHOR:         @jharrisong830
-VERSION:        1.0
+VERSION:        1.1
 DATE:           12/05/22
 DESCRIPTION:    Vector class
 '''
@@ -60,3 +60,19 @@ class Vector:
         for i in range(self.dimension):
             prod+=(self.get(i+1)*v.get(i+1))
         return prod
+    
+    def add(self, v):
+        '''Returns a vector that is the result of adding the original vector with v'''
+        if self.dimension!=v.dimension:
+            raise DimensionException
+        V=[]
+        for i in range(self.dimension):
+            V.append(self.get(i+1)+v.get(i+1))
+        return Vector(V)
+    
+    def scalar_multiply(self, a):
+        '''Returns a vector that is the result of multiplying the original vector by scalar a'''
+        V=[]
+        for i in range(self.dimension):
+            V.append(self.get(i+1)*a)
+        return Vector(V)
