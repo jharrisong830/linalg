@@ -1,7 +1,7 @@
 '''
 AUTHOR:         @jharrisong830
-VERSION:        1.1
-DATE:           12/05/22
+VERSION:        2.0
+DATE:           12/06/22
 DESCRIPTION:    Matrix creator and matrix operations calculator
 '''
 
@@ -140,3 +140,17 @@ class Matrix:
         self.rows=m
         self.columns=n
         self.__A=T
+    
+    def gauss(self):
+        '''Performs standard Gauss Elimination on a given matrix'''
+        for i in range(self.rows):
+            for j in range(i, self.columns):
+                if i==self.rows-1:
+                    break
+                elif self.get(i+1, j+1)==0:
+                    continue
+                for k in range(i, self.rows-1):
+                    coeff=-(self.get(k+2, j+1))/self.get(i+1, j+1)
+                    for l in range(j, self.columns):
+                        self.set(k+2, l+1, self.get(k+2, l+1)+(coeff*self.get(i+1, l+1)))
+                break
