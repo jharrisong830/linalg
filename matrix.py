@@ -1,7 +1,7 @@
 '''
 AUTHOR:         @jharrisong830
-VERSION:        2.0
-DATE:           12/06/22
+VERSION:        3.0
+DATE:           12/09/22
 DESCRIPTION:    Matrix creator and matrix operations calculator
 '''
 
@@ -29,7 +29,6 @@ class Matrix:
                         self.__A[i].append(1)
                     else:
                         self.__A[i].append(0)
-            print(str(self.rows)+"*"+str(self.columns)+" identity matrix created!")
         elif type(m)!=int or type(n)!=int:
             raise TypeError
         elif m<=0 or n<=0:
@@ -50,14 +49,14 @@ class Matrix:
                 self.__A.append([])
                 print("ROW "+str(i+1)+":")
                 for j in range(self.columns):
-                    self.__A[i].append(int(input("Entry "+str(j+1)+": ")))
+                    self.__A[i].append(float(input("Entry "+str(j+1)+": ")))
             print(str(self.rows)+"*"+str(self.columns)+" matrix created!")
         
     def __str__(self):
         max_width=0
         for i in range(self.rows):
             for j in range(self.columns):
-                width=len(str(self.__A[i][j]))
+                width=len(str(self.get(i+1, j+1)))
                 if width>max_width:
                     max_width=width
         result=""
@@ -69,9 +68,9 @@ class Matrix:
             else:
                 result+="|"
             for j in range(self.columns):
-                w=" "*(max_width-len(str(self.__A[i][j])))
+                w=" "*(max_width-len(str(self.get(i+1, j+1))))
                 result+=w
-                result+=str(self.__A[i][j])
+                result+=str(self.get(i+1, j+1))
                 if not j==self.columns-1:
                     result+=" "
             if i==0:
@@ -140,17 +139,149 @@ class Matrix:
         self.rows=m
         self.columns=n
         self.__A=T
+
+    def is_symmetric(self):
+        '''Returns whether a matrix is symmetric or not'''
+        if self.rows!=self.columns:
+            raise DimensionException
+        temp=Matrix(self.rows, self.columns, operation=True)
+        for i in range(temp.rows):
+            for j in range(temp.columns):
+                temp.set(i+1, j+1, self.get(i+1, j+1))
+        temp.transpose()
+        for i in range(temp.rows):
+            for j in range(temp.columns):
+                if self.get(i+1, j+1)!=temp.get(i+1, j+1):
+                    return False
+        return True
     
     def gauss(self):
         '''Performs standard Gauss Elimination on a given matrix'''
-        for i in range(self.rows):
+        for i in range(self.rows-1):
             for j in range(i, self.columns):
-                if i==self.rows-1:
-                    break
-                elif self.get(i+1, j+1)==0:
-                    continue
+                if self.get(i+1, j+1)==0:
+                    for l in range(i+1, self.rows):
+                        if self.get(l+1, j+1)!=0:
+                            curr_row=self.__row_vector(i+1).to_list().copy()
+                            next_row=self.__row_vector(l+1).to_list().copy()
+                            for x in range(self.columns):
+                                self.set(i+1, x+1, next_row[x])
+                                self.set(l+1, x+1, curr_row[x])
+                            break
                 for k in range(i, self.rows-1):
                     coeff=-(self.get(k+2, j+1))/self.get(i+1, j+1)
                     for l in range(j, self.columns):
                         self.set(k+2, l+1, self.get(k+2, l+1)+(coeff*self.get(i+1, l+1)))
                 break
+    
+    def rank(self):
+        '''Returns the rank of a matrix'''
+        temp=Matrix(self.rows, self.columns, operation=True)
+        for i in range(temp.rows):
+            for j in range(temp.columns):
+                temp.set(i+1, j+1, self.get(i+1, j+1))
+        temp.gauss()
+        pivots=0
+        for i in range(temp.rows):
+            row=temp.__row_vector(i+1)
+            for j in range(i, temp.columns):
+                if row.get(j+1)!=0:
+                    col=temp.__column_vector(j+1)
+                    coL=col.to_list()
+                    if coL!=[] and sum(coL[j+1:])==0:
+                        pivots+=1
+                        break
+        return pivots
+    
+    def rref(self):
+        '''Brings a matrix to its reduced-row-echelon form'''
+        self.gauss()
+        for i in range(self.rows):
+            for j in range(self.columns):
+                if self.get(i+1, j+1)==0:
+                    continue
+                coeff=self.get(i+1, j+1)
+                for x in range(j, self.columns):
+                    self.set(i+1, x+1, self.get(i+1, x+1)/coeff)
+                break
+        for i in range(1, self.rows):
+            for j in range(self.columns):
+                if self.get(i+1, j+1)==0:
+                    continue
+                for k in range(i, 0, -1):
+                    coeff=-(self.get(k, j+1))/self.get(i+1, j+1)
+                    for l in range(j, self.columns):
+                        self.set(k, l+1, self.get(k, l+1)+(coeff*self.get(i+1, l+1)))
+                break
+    
+    def inverse(self):
+        '''Inverts a matrix using the Gauss-Jordan process (if invertible)'''
+        if self.rank()<self.columns:
+            raise DimensionException
+        I=Matrix(self.columns, "identity")
+        gj=AugMatrix(self, I)
+        gj.rref()
+        inv=gj.get_aug()
+        for i in range(self.rows):
+            for j in range(self.columns):
+                self.set(i+1, j+1, inv.get(i+1, j+1))
+
+
+
+class AugMatrix(Matrix):
+
+    def __init__(self, A, B):
+        if A.rows!=B.rows:
+            raise DimensionException
+        Matrix.__init__(self, A.rows, A.columns+B.columns, operation=True)
+        self.reg_columns=A.columns
+        self.aug_columns=B.columns
+        for i in range(self.rows):
+            for j in range(self.reg_columns):
+                self.set(i+1, j+1, A.get(i+1, j+1))
+            for k in range(self.reg_columns, self.columns):
+                self.set(i+1, k+1, B.get(i+1, k+1-self.reg_columns))
+    
+    def __str__(self):
+        max_width=0
+        for i in range(self.rows):
+            for j in range(self.columns):
+                width=len(str(self.get(i+1, j+1)))
+                if width>max_width:
+                    max_width=width
+        result=""
+        for i in range(self.rows):
+            if i==0:
+                result+='\u2308'
+            elif i==self.rows-1:
+                result+='\u230a'
+            else:
+                result+="|"
+            for j in range(self.reg_columns):
+                w=" "*(max_width-len(str(self.get(i+1, j+1))))
+                result+=w
+                result+=str(self.get(i+1, j+1))
+                if not j==self.reg_columns-1:
+                    result+=" "
+            result+=" | "
+            for k in range(self.reg_columns, self.columns):
+                w=" "*(max_width-len(str(self.get(i+1, k+1))))
+                result+=w
+                result+=str(self.get(i+1, k+1))
+                if not k==self.columns-1:
+                    result+=" "
+            if i==0:
+                result+='\u2309\n'
+            elif i==self.rows-1:
+                result+='\u230b'
+            else:
+                result+="|\n"
+        return result
+    
+    def get_aug(self):
+        '''Returns a matrix of the augmented section'''
+        aug_matrix=Matrix(self.rows, self.aug_columns, operation=True)
+        for i in range(self.rows):
+            for j in range(self.aug_columns):
+                aug_matrix.set(i+1, j+1, self.get(i+1, j+1+self.reg_columns))
+        return aug_matrix

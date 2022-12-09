@@ -1,11 +1,12 @@
 '''
 AUTHOR:         @jharrisong830
-VERSION:        1.1
-DATE:           12/05/22
+VERSION:        3.0
+DATE:           12/09/22
 DESCRIPTION:    Vector class
 '''
 
 import math
+import matrix
 
 class DimensionException(Exception):
     def __init__(self, message="Invalid dimensions for this operation"):
@@ -76,3 +77,13 @@ class Vector:
         for i in range(self.dimension):
             V.append(self.get(i+1)*a)
         return Vector(V)
+    
+    def to_list(self):
+        return self.__vec
+
+    def to_matrix(self):
+        '''Returns a n*1 matrix of the vector'''
+        A=matrix.Matrix(self.dimension, 1, operation=True)
+        for i in range(self.dimension):
+            A.set(i+1, 1, self.get(i+1))
+        return A
