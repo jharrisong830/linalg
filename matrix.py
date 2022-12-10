@@ -1,7 +1,7 @@
 '''
 AUTHOR:         @jharrisong830
-VERSION:        3.1
-DATE:           12/09/22
+VERSION:        3.2
+DATE:           12/10/22
 DESCRIPTION:    Matrix creator and matrix operations calculator
 '''
 
@@ -161,12 +161,14 @@ class Matrix:
         return True
     
     def gauss(self):
-        '''Performs standard Gauss Elimination on a given matrix'''
+        '''Performs standard Gauss Elimination on a given matrix. Returns True for an odd amount of row swaps, False for even'''
+        row_swaps=False
         for i in range(self.rows-1):
             for j in range(i, self.columns):
                 if self.get(i+1, j+1)==0:
                     for l in range(i+1, self.rows):
                         if self.get(l+1, j+1)!=0:
+                            row_swaps=not row_swaps
                             curr_row=self.__row_vector(i+1).to_list().copy()
                             next_row=self.__row_vector(l+1).to_list().copy()
                             for x in range(self.columns):
@@ -178,6 +180,7 @@ class Matrix:
                     for l in range(j, self.columns):
                         self.set(k+2, l+1, self.get(k+2, l+1)+(coeff*self.get(i+1, l+1)))
                 break
+        return row_swaps
     
     def rank(self):
         '''Returns the rank of a matrix'''
@@ -227,6 +230,19 @@ class Matrix:
         for i in range(self.rows):
             for j in range(self.columns):
                 self.set(i+1, j+1, inv.get(i+1, j+1))
+    
+    def determinant(self):
+        if self.rows!=self.columns:
+            raise DimensionException
+        temp=self.copy()
+        sign=temp.gauss()
+        if sign:
+            det=-1
+        else:
+            det=1
+        for i in range(self.columns):
+            det*=temp.get(i+1, i+1)
+        return det
 
 
 
