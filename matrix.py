@@ -1,11 +1,11 @@
 '''
 AUTHOR:         @jharrisong830
-VERSION:        3.2
+VERSION:        3.3
 DATE:           12/10/22
 DESCRIPTION:    Matrix creator and matrix operations calculator
 '''
 
-from vector import *
+import vector
 
 class Matrix:
     '''Creates a matrix according to user input\n
@@ -32,7 +32,7 @@ class Matrix:
         elif type(m)!=int or type(n)!=int:
             raise TypeError
         elif m<=0 or n<=0:
-            raise DimensionException
+            raise vector.DimensionException
         elif operation:
             self.__A=[]
             self.rows=m
@@ -84,7 +84,7 @@ class Matrix:
     def __add__(self, B):
         '''Returns a new matrix, which is the result of adding the original matrix with B'''
         if self.rows!=B.rows and self.columns!=B.columns:
-            raise DimensionException
+            raise vector.DimensionException
         C=Matrix(self.rows, self.columns, operation=True)
         for i in range(self.rows):
             for j in range(self.columns):
@@ -94,7 +94,7 @@ class Matrix:
     def __mul__(self, B):
         '''Returns a new matrix, which is the result of multiplying the original matrix with B'''
         if self.columns!=B.rows:
-            raise DimensionException
+            raise vector.DimensionException
         C=Matrix(self.rows, B.columns, operation=True)
         for i in range(C.rows):
             for j in range(C.columns):
@@ -126,14 +126,14 @@ class Matrix:
 
     def __row_vector(self, m):
         '''Returns a vector of row m'''
-        return Vector(self.__A[m-1])
+        return vector.Vector(self.__A[m-1])
     
     def __column_vector(self, n):
         '''Returns a vector of column n'''
         result=[]
         for i in range(self.rows):
             result.append(self.get(i+1, n))
-        return Vector(result)
+        return vector.Vector(result)
     
     def transpose(self):
         '''Transposes a matrix'''
@@ -151,7 +151,7 @@ class Matrix:
     def is_symmetric(self):
         '''Returns whether a matrix is symmetric or not'''
         if self.rows!=self.columns:
-            raise DimensionException
+            raise vector.DimensionException
         temp=self.copy()
         temp.transpose()
         for i in range(temp.rows):
@@ -222,7 +222,7 @@ class Matrix:
     def inverse(self):
         '''Inverts a matrix using the Gauss-Jordan process (if invertible)'''
         if self.rank()<self.columns:
-            raise DimensionException
+            raise vector.DimensionException
         I=Matrix(self.columns, "identity")
         gj=AugMatrix(self, I)
         gj.rref()
@@ -233,7 +233,7 @@ class Matrix:
     
     def determinant(self):
         if self.rows!=self.columns:
-            raise DimensionException
+            raise vector.DimensionException
         temp=self.copy()
         sign=temp.gauss()
         if sign:
@@ -243,14 +243,28 @@ class Matrix:
         for i in range(self.columns):
             det*=temp.get(i+1, i+1)
         return det
-
+    
+    def projection_matrix(self):
+        '''Returns a projection matrix of the current matrix'''
+        At=self.copy()
+        At.transpose()
+        proj=At*self
+        proj.inverse()
+        proj=proj*At
+        proj=self*proj
+        return proj
+    
+    def projection(self, b):
+        '''Returns the projection of vector b onto the current matrix'''
+        b=b.to_matrix()
+        return self.projection_matrix()*b
 
 
 class AugMatrix(Matrix):
 
     def __init__(self, A, B):
         if A.rows!=B.rows:
-            raise DimensionException
+            raise vector.DimensionException
         Matrix.__init__(self, A.rows, A.columns+B.columns, operation=True)
         self.reg_columns=A.columns
         self.aug_columns=B.columns
