@@ -251,7 +251,7 @@ class Matrix:
             det*=temp.get(i+1, i+1)
         return det
     
-    def projection_matrix(self):
+    def proj_matrix(self):
         '''Returns a projection matrix of the current matrix'''
         At=self.copy()
         At.transpose()
@@ -261,7 +261,7 @@ class Matrix:
         proj=self*proj
         return proj
     
-    def projection(self, b):
+    def proj(self, b):
         '''Returns the projection of vector b onto the current matrix'''
         b=b.to_matrix()
         return self.projection_matrix()*b
