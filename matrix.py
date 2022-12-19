@@ -1,7 +1,7 @@
 '''
 AUTHOR:         @jharrisong830
-VERSION:        3.3
-DATE:           12/10/22
+VERSION:        3.4
+DATE:           12/18/22
 DESCRIPTION:    Matrix creator and matrix operations calculator
 '''
 
@@ -92,7 +92,13 @@ class Matrix:
         return C
     
     def __mul__(self, B):
-        '''Returns a new matrix, which is the result of multiplying the original matrix with B'''
+        '''Returns a new matrix, which is the result of multiplying the original matrix with B (a matrix or constant)'''
+        if type(B)==int or type(B)==float:
+            C=self.copy()
+            for i in range(C.rows):
+                for j in range(C.columns):
+                    C.set(i+1, j+1, C.get(i+1, j+1)*B)
+            return C
         if self.columns!=B.rows:
             raise vector.DimensionException
         C=Matrix(self.rows, B.columns, operation=True)
@@ -176,9 +182,10 @@ class Matrix:
                                 self.set(l+1, x+1, curr_row[x])
                             break
                 for k in range(i, self.rows-1):
-                    coeff=-(self.get(k+2, j+1))/self.get(i+1, j+1)
-                    for l in range(j, self.columns):
-                        self.set(k+2, l+1, self.get(k+2, l+1)+(coeff*self.get(i+1, l+1)))
+                    if self.get(k+2, j+1)!=0:
+                        coeff=-(self.get(k+2, j+1))/self.get(i+1, j+1)
+                        for l in range(j, self.columns):
+                            self.set(k+2, l+1, self.get(k+2, l+1)+(coeff*self.get(i+1, l+1)))
                 break
         return row_swaps
     
@@ -231,7 +238,7 @@ class Matrix:
             for j in range(self.columns):
                 self.set(i+1, j+1, inv.get(i+1, j+1))
     
-    def determinant(self):
+    def det(self):
         if self.rows!=self.columns:
             raise vector.DimensionException
         temp=self.copy()
