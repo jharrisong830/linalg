@@ -1,10 +1,8 @@
 # linalg
 A personal project that implements matricies, vectors, matrix operations, and other linear algebra topics in Python.
----
 ## Creating a Matrix
 - **m\*n** matrix -> `Matrix(m, n)`
 - **n\*n identity matrix** -> `Matrix(n, "identity")`
----
 ## Supported Functions on Matrices
 - **Addition** -> `A+B`, where A and B are both `m*n` matrices (*returns a new object*)
 - **Multiplication** -> `A*B`, where A is an `m*n` matrix, and B is an `n*p` matrix (*returns a new object*)
