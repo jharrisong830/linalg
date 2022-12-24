@@ -36,6 +36,10 @@ class Vector:
         for i in range(self.dimension):
             sum_of_squares+=self.get(i+1)**2
         return math.sqrt(sum_of_squares)
+    
+    def normalize(self):
+        '''Returns a normalized (length = 1) vector'''
+        return self.scalar_multiply(1/self.length())
 
     def get(self, n):
         return self.__vec[n-1]

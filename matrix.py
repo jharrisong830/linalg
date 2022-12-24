@@ -53,6 +53,7 @@ class Matrix:
             print(str(self.rows)+"*"+str(self.columns)+" matrix created!")
         
     def __str__(self):
+        self.__defloat()
         max_width=0
         for i in range(self.rows):
             for j in range(self.columns):
@@ -80,6 +81,13 @@ class Matrix:
             else:
                 result+="|\n"
         return result
+    
+    def __defloat(self):
+        '''for each element that can be represented as an int, convert it to int'''
+        for i in range(self.rows):
+            for j in range(self.columns):
+                if self.get(i+1, j+1)%1==0:
+                    self.set(i+1, j+1, int(self.get(i+1, j+1)))
     
     def __add__(self, B):
         '''Returns a new matrix, which is the result of adding the original matrix with B'''
